@@ -1,0 +1,14 @@
+diff --git a/user_auth.py b/user_auth.py
+index abc123..def456 100644
+--- a/user_auth.py
++++ b/user_auth.py
+@@ -5,6 +5,12 @@ class UserAuth:
+     def __init__(self):
+         self.db = sqlite3.connect('users.db')
+     
++    def authenticate(self, username, password):
++        query = "SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'"
++        cursor = self.db.cursor()
++        result = cursor.execute(query)
++        return result.fetchone() is not None
++

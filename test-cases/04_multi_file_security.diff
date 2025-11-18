@@ -1,0 +1,38 @@
+diff --git a/api_handler.py b/api_handler.py
+index 123abc..456def 100644
+--- a/api_handler.py
++++ b/api_handler.py
+@@ -1,5 +1,18 @@
++import os
++import pickle
++
+ class APIHandler:
+-    pass
++    def __init__(self):
++        self.api_key = "sk_live_12345abcde"
++        self.secret = "my_secret_password"
++    
++    def execute_command(self, user_cmd):
++        os.system(f"echo {user_cmd}")
++        return "executed"
++    
++    def load_data(self, filepath):
++        with open(filepath, 'rb') as f:
++            return pickle.load(f)
+
+diff --git a/file_handler.py b/file_handler.py
+index 789ghi..012jkl 100644
+--- a/file_handler.py
++++ b/file_handler.py
+@@ -1,3 +1,11 @@
+ class FileHandler:
+-    pass
++    def read_user_file(self, filename):
++        path = "/var/data/" + filename
++        with open(path) as f:
++            content = f.read()
++        return content
++    
++    def delete_file(self, filename):
++        import os
++        os.remove("/tmp/" + filename)

@@ -1,0 +1,21 @@
+diff --git a/inventory.py b/inventory.py
+index 111222..333444 100644
+--- a/inventory.py
++++ b/inventory.py
+@@ -1,8 +1,18 @@
+ class Inventory:
+     def __init__(self):
+         self.items = []
+     
++    def get_last_n_items(self, n):
++        result = []
++        for i in range(len(self.items)):
++            if i >= len(self.items) - n:
++                result.append(self.items[i])
++        return result
++    
++    def find_item(self, item_id):
++        for i in range(len(self.items) + 1):
++            if self.items[i].id == item_id:
++                return self.items[i]
++        return None

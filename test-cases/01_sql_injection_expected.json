@@ -1,0 +1,11 @@
+{
+  "name": "SQL Injection in User Login",
+  "expected_findings": [
+    "SQL injection vulnerability in authenticate method due to string concatenation of user inputs",
+    "Missing docstring for authenticate method",
+    "No error handling for database query failures",
+    "Database cursor not explicitly closed (best practice)",
+    "Missing test coverage for authenticate method"
+  ],
+  "min_severity": 8
+}

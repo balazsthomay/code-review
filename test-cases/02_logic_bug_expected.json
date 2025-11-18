@@ -1,0 +1,12 @@
+{
+  "name": "Off-by-One and Index Errors",
+  "expected_findings": [
+    "Off-by-one error in find_item causing IndexError - loop iterates beyond list bounds",
+    "Inefficient implementation of get_last_n_items - should use list slicing",
+    "No error handling for edge cases in get_last_n_items (n=0, n>length, negative n, empty list)",
+    "Missing docstrings for both methods",
+    "Missing test coverage for get_last_n_items",
+    "Missing test coverage for find_item"
+  ],
+  "min_severity": 6
+}

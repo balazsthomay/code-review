@@ -1,0 +1,21 @@
+{
+  "name": "Multiple Security Vulnerabilities Across Files",
+  "expected_findings": [
+    "Hardcoded API key in api_handler.py",
+    "Hardcoded secret password in api_handler.py",
+    "Command injection vulnerability in execute_command via os.system with unsanitized user input",
+    "Insecure deserialization using pickle.load in load_data which can execute arbitrary code",
+    "Path traversal vulnerability in read_user_file allowing access to arbitrary files",
+    "Path traversal vulnerability in delete_file allowing deletion of arbitrary files",
+    "No input validation in execute_command",
+    "No path sanitization in read_user_file and delete_file",
+    "Missing error handling in all methods",
+    "Missing docstrings for both classes and all methods",
+    "Missing error handling in delete_file for file not found or permission errors",
+    "Missing test coverage for execute_command including command injection attempts",
+    "Missing test coverage for load_data including malicious pickle payloads",
+    "Missing test coverage for read_user_file including path traversal attempts, file not found, permission errors",
+    "Missing test coverage for delete_file including path traversal attempts, file not found, permission errors"
+  ],
+  "min_severity": 8
+}
