@@ -12,3 +12,5 @@ wheels/
 .env
 sample_report.md
 user-data/
+
+chroma_db/

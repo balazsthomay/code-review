@@ -1,22 +1,18 @@
 {
   "name": "Mixed Security, Logic, and Quality Issues",
   "expected_findings": [
-    "Weak cryptographic hash algorithm (MD5) used for password hashing in create_user",
-    "Cryptographically insecure random number generator (random.randint) used for token generation",
-    "Weak session validation in validate_session - only checks if token exists, not authenticity or expiry",
+    "Insecure password hashing using MD5 without salt in create_user",
+    "Insecure token generation using random.randint with weak digit-only token space",
+    "Weak session validation in validate_session - only checks if token exists without verifying authenticity or expiry",
     "validate_email always returns True without any actual email validation logic",
     "get_users calls undefined method fetch_user which will cause AttributeError at runtime",
-    "Missing salt when hashing passwords in create_user",
-    "Token generation only uses digits (0-9) resulting in weak token space",
-    "validate_session can be simplified to return bool(token)",
-    "Missing docstrings for both classes and all methods",
-    "Missing error handling in get_users for when fetch_user fails",
-    "No validation that count parameter in get_users is positive",
-    "Missing test coverage for create_user including password hashing verification, edge cases for inputs",
-    "Missing test coverage for generate_token including uniqueness, randomness quality, token strength",
-    "Missing test coverage for validate_email including valid/invalid email formats, edge cases",
-    "Missing test coverage for get_users including undefined fetch_user error, negative count, empty results",
-    "Missing test coverage for validate_session including empty strings, None, expired tokens, forged tokens"
+    "Missing docstrings for classes and methods",
+    "Missing error handling in get_users and other methods",
+    "Missing test coverage for create_user",
+    "Missing test coverage for generate_token",
+    "Missing test coverage for validate_email",
+    "Missing test coverage for get_users",
+    "Missing test coverage for validate_session"
   ],
   "min_severity": 7
 }
