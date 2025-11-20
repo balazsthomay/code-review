@@ -13,9 +13,14 @@ An AI-powered code review system using multiple specialized agents with RAG (Ret
 - **Test Coverage Agent**: Identifies missing test scenarios and coverage gaps
 
 **2. RAG Knowledge Base (ChromaDB)**
-- Security patterns collection: OWASP Top 10 2021 vulnerability patterns with CWE mappings (only A01 and A03 so far)
+- **5 vector collections with 52 patterns total:**
+  - Security patterns (13): OWASP Top 10 2021 with CWE mappings
+  - Best practices patterns (20): PEP 8, PEP 257 guidelines
+  - Python gotchas patterns (9): Late binding, mutable defaults, etc.
+  - Code review patterns (8): Google Engineering Practices, API breaking changes
+  - Refactoring patterns (7): Shotgun surgery, cross-file dependencies, backward compatibility (Google AIP-180, Martin Fowler, Kent Beck TDD)
 - Vector similarity search retrieves relevant patterns based on code diff
-- Security Agent achieves 100% recall on security vulnerabilities with RAG
+- All patterns sourced from authoritative references (OWASP, Google, Python.org, Refactoring Guru)
 
 **3. Aggregator**
 - Deduplicates findings across agents
@@ -23,17 +28,24 @@ An AI-powered code review system using multiple specialized agents with RAG (Ret
 - Generates consolidated markdown reports
 
 **4. Evaluation Framework**
-- LLM-as-judge evaluation comparing findings against ground truth
-- Metrics: Recall, Precision, F1 score
-- 5 test cases covering SQL injection, logic bugs, code quality, and multi-file security issues
+- **Hybrid evaluation** combining automated location metrics + LLM semantic relevance
+- **Metrics**: File recall, line precision/recall (with 5-line tolerance), LLM relevance (0.0-1.0), composite score
+- **Benchmark**: BugsInPy dataset (502 real Python bugs from 17 production projects)
+- **Tested on 20+ diverse bugs** across scrapy, ansible, keras, pandas, matplotlib, fastapi, etc.
+
+- + 5 test cases covering SQL injection, logic bugs, code quality, and multi-file security issues
 
 ## Setup
 ```bash
 # Install dependencies
 uv sync
 
-# Build security knowledge base
+# Build all knowledge bases
 uv run build_security_kb.py
+uv run build_best_practices_kb.py
+uv run build_python_gotchas_kb.py
+uv run build_code_review_kb.py
+uv run build_refactoring_patterns_kb.py
 ```
 
 ## Workflow
@@ -47,13 +59,28 @@ uv run build_security_kb.py
 ## Project Structure
 ```
 .
-├── build_security_kb.py      # Builds ChromaDB with OWASP patterns
-├── with_rag.ipynb           # Current code review pipeline
-├── test-cases/                # Evaluation test diffs and ground truths
-├── chroma_db/                 # Vector database (not committed)
-└── pyproject.toml            # Dependencies
+├── build_security_kb.py              # OWASP security patterns
+├── build_best_practices_kb.py        # PEP 8/257 guidelines
+├── build_python_gotchas_kb.py        # Python-specific pitfalls
+├── build_code_review_kb.py           # Google Engineering Practices
+├── build_refactoring_patterns_kb.py  # Multi-file refactoring patterns
+├── with_more_rag.ipynb               # Main code review pipeline with RAG
+├── basics.ipynb                      # Basic agent setup
+├── BugsInPy/                         # Dataset (502 real bugs)
+├── chroma_db/                        # Vector database (not committed)
+└── pyproject.toml                    # Dependencies
 ```
 
 ## Current Performance
 
-Security Agent with RAG: 100% recall on security vulnerabilities across all test cases
+**100% pass rate** on BugsInPy benchmark test set (18/18 valid bugs passed with composite score ≥ 60%)
+
+**Key improvements:**
+- Prompt engineering: Deletion analysis + chain-of-thought reasoning (70% → 100%)
+- Multi-file awareness in aggregator for cross-file dependency detection
+- Temperature optimization: default for review agents, 0.5 for aggregator/judge
+
+**Typical results:**
+- Most bugs achieve 100% composite score (perfect line recall + LLM relevance)
+- Handles diverse bug types: logic errors, security vulnerabilities, style issues, missing tests
+- Tested across 17 production Python projects (scrapy, ansible, keras, pandas, matplotlib, fastapi, etc.)
