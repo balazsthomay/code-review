@@ -13,8 +13,8 @@ An AI-powered code review system using multiple specialized agents with RAG (Ret
 - **Test Coverage Agent**: Identifies missing test scenarios and coverage gaps
 
 **2. RAG Knowledge Base (ChromaDB)**
-- **5 vector collections with 52 patterns total:**
-  - Security patterns (13): OWASP Top 10 2021 with CWE mappings
+- **5 vector collections with 82 patterns total:**
+  - Security patterns (43): Complete OWASP Top 10 2021 with CWE mappings
   - Best practices patterns (20): PEP 8, PEP 257 guidelines
   - Python gotchas patterns (9): Late binding, mutable defaults, etc.
   - Code review patterns (8): Google Engineering Practices, API breaking changes
@@ -73,12 +73,17 @@ uv run build_refactoring_patterns_kb.py
 
 ## Current Performance
 
-**100% pass rate** on BugsInPy benchmark test set (18/18 valid bugs passed with composite score ≥ 60%)
+**BugsInPy Benchmark:** 100% pass rate (18/18 valid bugs passed with composite score ≥ 60%)
+
+**CVE Benchmark:** 94% pass rate (16/17 CVEs, 94% security detection rate)
+- 17 real-world Python CVEs covering 11 CWE types (SQL Injection, Command Injection, XSS, Path Traversal, etc.)
+- Projects: Django, Requests, urllib3, Setuptools, Jinja2, PyYAML, Pillow, Flask, Cryptography
 
 **Key improvements:**
 - Prompt engineering: Deletion analysis + chain-of-thought reasoning (70% → 100%)
 - Multi-file awareness in aggregator for cross-file dependency detection
 - Temperature optimization: default for review agents, 0.5 for aggregator/judge
+- Schema validation: max 20 lines per finding + max_tokens=4000
 
 **Typical results:**
 - Most bugs achieve 100% composite score (perfect line recall + LLM relevance)
