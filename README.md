@@ -41,32 +41,59 @@ An AI-powered code review system using multiple specialized agents with RAG (Ret
 uv sync
 
 # Build all knowledge bases
-uv run uv run -m rag.build_security_kb
-uv run uv run -m build_best_practices_kb.py
-uv run uv run -m build_python_gotchas_kb.py
-uv run uv run -m build_code_review_kb.py
-uv run uv run -m build_refactoring_patterns_kb.py
+uv run -m code_review.rag.build_security_kb
+uv run -m code_review.rag.build_best_practices_kb
+uv run -m code_review.rag.build_python_gotchas_kb
+uv run -m code_review.rag.build_code_review_kb
+uv run -m code_review.rag.build_refactoring_patterns_kb
+```
+
+## Usage
+
+```python
+from code_review import review_code
+
+# Read your git diff
+diff = open("changes.diff").read()
+
+# Run the review
+report = await review_code(diff, save_output=True)
+print(report)
 ```
 
 ## Workflow
 
 1. Input: Git diff of code changes
-2. Each agent analyzes the diff independently
-3. RAG augments Security Agent with relevant OWASP patterns
-4. Aggregator merges findings and generates report
+2. Each agent analyzes the diff independently with RAG-enhanced context
+3. RAG retrieves relevant patterns from 5 knowledge bases (security, best practices, gotchas, code review, refactoring)
+4. Aggregator deduplicates and merges findings into consolidated report
 5. Evaluation framework measures performance against ground truth
 
 ## Project Structure
 ```
 .
-├── build_security_kb.py              # OWASP security patterns
-├── build_best_practices_kb.py        # PEP 8/257 guidelines
-├── build_python_gotchas_kb.py        # Python-specific pitfalls
-├── build_code_review_kb.py           # Google Engineering Practices
-├── build_refactoring_patterns_kb.py  # Multi-file refactoring patterns
-├── with_more_rag.ipynb               # Main code review pipeline with RAG
-├── basics.ipynb                      # Basic agent setup
-├── BugsInPy/                         # Dataset (502 real bugs)
+├── code_review/                      # Main package
+│   ├── __init__.py                  # Exports review_code
+│   ├── schemas.py                   # Pydantic models (8 schemas)
+│   ├── agents.py                    # 5 agents (4 review + aggregator)
+│   ├── pipeline.py                  # Main review pipeline
+│   ├── rag/                         # RAG knowledge base
+│   │   ├── retrieval.py            # 5 retrieval functions
+│   │   ├── build_security_kb.py    # OWASP Top 10 2021 (43 patterns)
+│   │   ├── build_best_practices_kb.py  # PEP 8/257 (20 patterns)
+│   │   ├── build_python_gotchas_kb.py  # Python pitfalls (9 patterns)
+│   │   ├── build_code_review_kb.py     # Google practices (8 patterns)
+│   │   └── build_refactoring_patterns_kb.py  # Refactoring (7 patterns)
+│   └── benchmarks/                  # Evaluation framework
+│       ├── utils.py                # Shared evaluation utilities
+│       ├── synthetic.py            # 5 synthetic test cases
+│       ├── bugsinpy.py             # BugsInPy dataset (502 bugs)
+│       └── cve.py                  # CVE dataset (17 CVEs)
+├── final.ipynb                       # Demo notebook
+├── notebooks/                        # Experimental notebooks
+├── BugsInPy/                         # BugsInPy dataset
+├── cve_patches/                      # CVE patch files
+├── test-cases/                       # Synthetic test cases
 ├── chroma_db/                        # Vector database (not committed)
 └── pyproject.toml                    # Dependencies
 ```
