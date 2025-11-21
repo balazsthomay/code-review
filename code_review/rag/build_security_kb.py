@@ -18,16 +18,7 @@ security_collection = chroma_client.create_collection(
 )
 
 # Security patterns extracted from official OWASP documentation
-# Source: https://owasp.org/Top10/A01_2021-Broken_Access_Control/
-# Source: https://owasp.org/Top10/A02_2021-Cryptographic_Failures/
-# Source: https://owasp.org/Top10/A03_2021-Injection/
-# Source: https://owasp.org/Top10/A04_2021-Insecure_Design/
-# Source: https://owasp.org/Top10/A05_2021-Security_Misconfiguration/
-# Source: https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/
-# Source: https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/
-# Source: https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures/
-# Source: https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
-# Source: https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/
+# for example https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/
 
 security_patterns = [
     # From A01: Broken Access Control
