@@ -41,11 +41,11 @@ An AI-powered code review system using multiple specialized agents with RAG (Ret
 uv sync
 
 # Build all knowledge bases
-uv run build_security_kb.py
-uv run build_best_practices_kb.py
-uv run build_python_gotchas_kb.py
-uv run build_code_review_kb.py
-uv run build_refactoring_patterns_kb.py
+uv run uv run -m rag.build_security_kb
+uv run uv run -m build_best_practices_kb.py
+uv run uv run -m build_python_gotchas_kb.py
+uv run uv run -m build_code_review_kb.py
+uv run uv run -m build_refactoring_patterns_kb.py
 ```
 
 ## Workflow
@@ -89,3 +89,7 @@ uv run build_refactoring_patterns_kb.py
 - Most bugs achieve 100% composite score (perfect line recall + LLM relevance)
 - Handles diverse bug types: logic errors, security vulnerabilities, style issues, missing tests
 - Tested across 17 production Python projects (scrapy, ansible, keras, pandas, matplotlib, fastapi, etc.)
+
+
+Note: the notebooks were built and tested in the root and subsequently moved to the notebooks/ folder after converting to python modules so the imports might not work there.
+
