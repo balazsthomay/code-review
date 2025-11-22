@@ -15,12 +15,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout review action code
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ github.action_repository }}
-        path: .code-review-action
-    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -34,13 +28,10 @@ runs:
     
     - name: Install dependencies
       shell: bash
-      working-directory: .code-review-action
-      run: |
-        uv sync
+      run: uv sync
     
     - name: Run code review
       shell: bash
-      working-directory: .code-review-action
       env:
         OPENAI_API_KEY: ${{ inputs.openai_api_key }}
         OPENROUTER_API_KEY: ${{ inputs.openrouter_api_key }}
@@ -49,5 +40,4 @@ runs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         REPO_OWNER: ${{ github.repository_owner }}
         REPO_NAME: ${{ github.event.repository.name }}
-      run: |
-        uv run python .github/actions/review-pr/review_pr.py
+      run: uv run python .github/actions/review-pr/review_pr.py
