@@ -50,15 +50,8 @@ uv run -m code_review.rag.build_refactoring_patterns_kb
 
 ## Usage
 
-```python
-from code_review import review_code
-
-# Read your git diff
-diff = open("changes.diff").read()
-
-# Run the review
-report = await review_code(diff, save_output=True)
-print(report)
+```bash
+uv run run_review.py
 ```
 
 ## Workflow
@@ -89,12 +82,17 @@ print(report)
 │       ├── synthetic.py            # 5 synthetic test cases
 │       ├── bugsinpy.py             # BugsInPy dataset (502 bugs)
 │       └── cve.py                  # CVE dataset (17 CVEs)
-├── final.ipynb                       # Demo notebook
-├── notebooks/                        # Experimental notebooks
-├── BugsInPy/                         # BugsInPy dataset
-├── cve_patches/                      # CVE patch files
+├── .github/
+│   ├── workflows/
+│   │   └── code-review.yml         # GitHub Action workflow
+│   └── actions/
+│       └── review-pr/              # Reusable action
+│           ├── action.yml          # Action definition
+│           └── review_pr.py        # PR review orchestration
+├── chroma_db/                        # Vector database (committed)
 ├── test-cases/                       # Synthetic test cases
-├── chroma_db/                        # Vector database (not committed)
+├── BugsInPy/                         # BugsInPy dataset (not in repo)
+├── cve_patches/                      # CVE patch files (not in repo)
 └── pyproject.toml                    # Dependencies
 ```
 
@@ -112,14 +110,14 @@ print(report)
 - Temperature optimization: default for review agents, 0.5 for aggregator/judge
 - Schema validation: max 20 lines per finding + max_tokens=4000
 
-**Typical results:**
-- Most bugs achieve 100% composite score (perfect line recall + LLM relevance)
-- Handles diverse bug types: logic errors, security vulnerabilities, style issues, missing tests
-- Tested across 17 production Python projects (scrapy, ansible, keras, pandas, matplotlib, fastapi, etc.)
-
-
 Note: the notebooks were built and tested in the root and subsequently moved to the notebooks/ folder after converting to python modules so the imports might not work there.
 
-# Test comment
-# Test comment
-# Another test
+
+## GitHub Action Integration
+
+Automatically review PRs with GitHub Actions. See [USAGE.md](USAGE.md) for setup instructions.
+
+**Quick setup:**
+1. Add `OPENAI_API_KEY` and `OPENROUTER_API_KEY` to repository secrets
+2. Create `.github/workflows/code-review.yml` with the workflow configuration
+3. Every PR gets automatically reviewed - action fails and blocks merge if issues found
