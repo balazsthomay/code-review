@@ -115,9 +115,35 @@ Note: the notebooks were built and tested in the root and subsequently moved to 
 
 ## GitHub Action Integration
 
-Automatically review PRs with GitHub Actions. See [USAGE.md](USAGE.md) for setup instructions.
+**To use this in your repositories:**
 
-**Quick setup:**
-1. Add `OPENAI_API_KEY` and `OPENROUTER_API_KEY` to repository secrets
-2. Create `.github/workflows/code-review.yml` with the workflow configuration
-3. Every PR gets automatically reviewed - action fails and blocks merge if issues found
+1. Fork this repository to your GitHub account
+2. In repo where you want automated reviews, create `.github/workflows/code-review.yml`:
+```yaml
+   name: AI Code Review
+   
+   on:
+     pull_request:
+       types: [opened, synchronize, reopened]
+   
+   jobs:
+     review:
+       runs-on: ubuntu-latest
+       permissions:
+         contents: read
+         pull-requests: write
+       
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v4
+         
+         - name: Run AI Code Review
+           uses: YourGitHubUsername/code-review@main  # Your fork
+           with:
+             openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+             openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+             min_severity: 5
+```
+3. Add `OPENAI_API_KEY` and `OPENROUTER_API_KEY` to that repository's secrets
+
+Every PR will be automatically reviewed. Action passes if clean, fails and blocks merge if issues found.
