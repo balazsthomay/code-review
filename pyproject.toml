@@ -11,4 +11,5 @@ dependencies = [
     "openai-agents[litellm,viz]>=0.5.1",
     "pytest>=9.0.1",
     "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
 ]

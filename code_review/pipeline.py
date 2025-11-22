@@ -139,12 +139,12 @@ def organize_findings(code_result, security_result, best_practices_result, test_
     return organized
 
 
-async def review_code(diff: str, save_output: bool = True, min_severity: int = 1) -> str:
+async def review_code(diff: str, save_output: bool = True, min_severity: int = 5) -> str:
     """Complete code review pipeline
 
     Args:
         diff: The code diff to review
-        min_severity: Minimum severity threshold (1-10). Findings below this are filtered out. (default: 1)
+        min_severity: Minimum severity threshold (1-10). Findings below this are filtered out. (default: 5)
 
     Returns:
         Markdown-formatted code review report
@@ -171,7 +171,7 @@ async def review_code(diff: str, save_output: bool = True, min_severity: int = 1
 
         # If all findings were filtered out, return early with a clean report
         if not any(organized.values()):
-            clean_report = "# Code Review Report\n\nNo issues found meeting severity threshold.\n"
+            clean_report = "No issues found meeting severity threshold.\n"
             print(clean_report)
             return clean_report
 

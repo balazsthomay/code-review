@@ -554,6 +554,7 @@ dependencies = [
     { name = "openai-agents", extra = ["litellm", "viz"] },
     { name = "pytest" },
     { name = "python-dotenv" },
+    { name = "requests" },
 ]
 
 [package.metadata]
@@ -564,6 +565,7 @@ requires-dist = [
     { name = "openai-agents", extras = ["litellm", "viz"], specifier = ">=0.5.1" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "requests", specifier = ">=2.32.5" },
 ]
 
 [[package]]
