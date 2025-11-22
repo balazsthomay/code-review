@@ -12,8 +12,11 @@ jobs:
       pull-requests: write
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       - name: Run AI Code Review
-        uses: ./
+        uses: ./.github/actions/review-pr
         with:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
