@@ -139,12 +139,12 @@ def organize_findings(code_result, security_result, best_practices_result, test_
     return organized
 
 
-async def review_code(diff, save_output=True):
+async def review_code(diff: str, save_output: bool = True, min_severity: int = 1) -> str:
     """Complete code review pipeline
 
     Args:
         diff: The code diff to review
-        save_output: Whether to save the report to user-data/ (default: True)
+        min_severity: Minimum severity threshold (1-10). Findings below this are filtered out. (default: 1)
 
     Returns:
         Markdown-formatted code review report
@@ -153,20 +153,32 @@ async def review_code(diff, save_output=True):
         results = await run_all_agents(diff)
         code_result, security_result, best_practices_result, test_coverage_result = results
 
+        # Filter findings by severity threshold
+        def filter_by_severity(result):
+            filtered_findings = [
+                finding for finding in result.final_output.findings
+                if getattr(finding, 'severity', getattr(finding, 'priority', 0)) >= min_severity
+            ]
+            result.final_output.findings = filtered_findings
+            return result
+
+        code_result = filter_by_severity(code_result)
+        security_result = filter_by_severity(security_result)
+        best_practices_result = filter_by_severity(best_practices_result)
+        test_coverage_result = filter_by_severity(test_coverage_result)
+
         organized = organize_findings(code_result, security_result, best_practices_result, test_coverage_result)
 
-        print("\n" + "="*60)
-        print("CALLING AGGREGATOR...")
-        print("="*60)
+        # If all findings were filtered out, return early with a clean report
+        if not any(organized.values()):
+            clean_report = "# Code Review Report\n\nNo issues found meeting severity threshold.\n"
+            print(clean_report)
+            return clean_report
 
         result = await Runner.run(aggregator, f"Aggregate these findings into a structured report:\n\n{organized}")
         report = result.final_output
 
-        print("\n" + "="*60)
-        print("AGGREGATOR OUTPUT:")
-        print("="*60)
         print(report)
-        print("="*60 + "\n")
 
         if save_output:
             os.makedirs("user-data", exist_ok=True)

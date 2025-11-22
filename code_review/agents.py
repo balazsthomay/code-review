@@ -21,7 +21,6 @@ from code_review.schemas import (
 
 
 # Agent Instructions
-# ==================
 
 CODE_ANALYZER_INSTRUCTIONS = """You are a Code Analyzer agent reviewing a pull request diff.
 
@@ -29,6 +28,8 @@ ANALYSIS APPROACH:
 1. First, describe what changed: What code was added? What was removed? What was modified?
 2. Then, identify potential issues in the changes
 3. Consider the inverse: What functionality might be LOST from deletions?
+
+CRITICAL: Only create findings for actual bugs, logic errors, or antipatterns. If the code is clean and correct, return an empty findings list.
 
 DELETION ANALYSIS (CRITICAL):
 - When you see removed code (lines starting with -), pay special attention to:
@@ -56,6 +57,8 @@ ANALYSIS APPROACH:
 2. Identify what security controls or validations were added or removed
 3. Consider: Does this change introduce new attack surface?
 
+CRITICAL: Only create findings for actual security vulnerabilities or risks. If the code is secure and follows security best practices, return an empty findings list.
+
 SECURITY PATTERNS:
 - SQL injection, command injection, XSS vulnerabilities
 - Hardcoded secrets/credentials, insecure authentication
@@ -79,6 +82,8 @@ ANALYSIS APPROACH:
 2. Identify violations of best practices in the new/modified code
 3. Consider: Does this change make the code harder to maintain?
 
+CRITICAL: Only create findings for actual violations of coding standards and best practices. If the code follows PEP 8, has proper docstrings, and is well-structured, return an empty findings list.
+
 CODE QUALITY ISSUES:
 - Unclear variable names, functions exceeding 50 lines
 - Nested complexity over 3 levels, missing docstrings
@@ -99,10 +104,20 @@ TEST_COVERAGE_INSTRUCTIONS = """You are a Test Coverage agent reviewing a pull r
 
 ANALYSIS APPROACH:
 1. Identify what functions/methods are new or modified
-2. For each, list what test scenarios are needed
-3. Consider edge cases and error conditions
+2. For each, assess criticality and risk
+3. Only flag missing tests for high-risk code
 
-For each new or modified function, suggest test cases covering:
+CRITICAL: Only create test gap findings for functions that are genuinely risky if untested. Use priority 7-8 for critical code, priority 4-5 for nice-to-have tests.
+
+PRIORITY GUIDELINES:
+- Priority 8-10: Functions handling user input, authentication, authorization, financial transactions, data persistence, security controls, or external API calls
+- Priority 7: Functions with complex logic, multiple conditional branches, error-prone operations (file I/O, parsing, calculations)
+- Priority 4-6: Simple utility functions, formatters, getters/setters, straightforward data transformations
+- Priority 1-3: Trivial helpers (one-liners, simple wrappers, obvious logic)
+
+DO NOT FLAG: Trivial helper functions, simple string formatters, obvious getters/setters, or functions with self-evident correctness.
+
+For each flagged function, suggest test cases covering:
 - Normal input cases
 - Edge cases (empty, null, boundary values)
 - Error conditions (exceptions, failures, timeouts)
