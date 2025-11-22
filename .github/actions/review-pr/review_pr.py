@@ -50,12 +50,16 @@ async def main():
         'Accept': 'application/vnd.github.v3+json'
     }
     
-    comment_body = f"## 🤖 AI Code Review\n\n{report}"
+    comment_body = report
     
     response = requests.post(comment_url, headers=headers, json={'body': comment_body})
     response.raise_for_status()
     
     print(f"✓ Posted review comment on PR #{pr_number}")
+    
+    # Exit with failure to block PR merge (remove these two if want to not block PR)
+    print("Code review found issues - blocking PR")
+    sys.exit(1)
 
 
 if __name__ == '__main__':
