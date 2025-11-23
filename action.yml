@@ -36,7 +36,17 @@ runs:
       shell: bash
       working-directory: .code-review-action
       run: uv sync
-    
+
+    - name: Create vector store from codebase
+      id: vector-store
+      shell: bash
+      working-directory: .code-review-action
+      env:
+        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+      run: |
+        output=$(uv run python create_vector_store.py)
+        echo "$output" >> $GITHUB_OUTPUT
+
     - name: Run code review
       shell: bash
       working-directory: .code-review-action
@@ -44,8 +54,21 @@ runs:
         OPENAI_API_KEY: ${{ inputs.openai_api_key }}
         OPENROUTER_API_KEY: ${{ inputs.openrouter_api_key }}
         MIN_SEVERITY: ${{ inputs.min_severity }}
+        VECTOR_STORE_ID: ${{ steps.vector-store.outputs.vector_store_id }}
         GITHUB_TOKEN: ${{ github.token }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         REPO_OWNER: ${{ github.repository_owner }}
         REPO_NAME: ${{ github.event.repository.name }}
       run: uv run python review_pr.py
+
+    - name: Cleanup vector store
+      if: always()
+      shell: bash
+      working-directory: .code-review-action
+      env:
+        OPENAI_API_KEY: ${{ inputs.openai_api_key }}
+        VECTOR_STORE_ID: ${{ steps.vector-store.outputs.vector_store_id }}
+      run: |
+        if [ -n "$VECTOR_STORE_ID" ]; then
+          uv run python -c "from code_review.vector_store import delete_vector_store; import os; delete_vector_store(os.getenv('OPENAI_API_KEY'), os.getenv('VECTOR_STORE_ID'))"
+        fi

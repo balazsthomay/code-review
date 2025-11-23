@@ -174,4 +174,4 @@ jobs:
           min_severity: 5
 ```
 
-Every PR will be automatically reviewed. Action passes if clean, fails and blocks merge if issues found.
+Every PR is automatically reviewed. Action passes if clean, fails and blocks merge if issues found. Includes codebase context via FileSearchTool (~30-60s indexing, ~$0.005 per PR).

@@ -20,6 +20,7 @@ async def main():
     repo_owner = os.environ['REPO_OWNER']
     repo_name = os.environ['REPO_NAME']
     min_severity = int(os.environ.get('MIN_SEVERITY', '5'))
+    vector_store_id = os.environ.get('VECTOR_STORE_ID')
     
     # Get PR diff
     diff_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls/{pr_number}"
@@ -34,9 +35,11 @@ async def main():
     
     print(f"Running code review on PR #{pr_number}")
     print(f"Minimum severity threshold: {min_severity}")
-    
+    if vector_store_id:
+        print(f"Using codebase context (vector store: {vector_store_id})")
+
     # Run review
-    report = await review_code(diff, save_output=False, min_severity=min_severity)
+    report = await review_code(diff, save_output=False, min_severity=min_severity, vector_store_id=vector_store_id)
     
     # Check if there are issues
     if "No issues found" in report:
