@@ -25,14 +25,14 @@ flowchart TD
 
     Aggregator --> Output[PR Review Comment]
 
-    style Input fill:#e1f5ff
-    style RAG fill:#fff4e1
-    style Agent1 fill:#e8f5e9
-    style Agent2 fill:#e8f5e9
-    style Agent3 fill:#e8f5e9
-    style Agent4 fill:#e8f5e9
-    style Aggregator fill:#f3e5f5
-    style Output fill:#e1f5ff
+    style Input fill:#4A90E2,color:#fff
+    style RAG fill:#F39C12,color:#fff
+    style Agent1 fill:#27AE60,color:#fff
+    style Agent2 fill:#27AE60,color:#fff
+    style Agent3 fill:#27AE60,color:#fff
+    style Agent4 fill:#27AE60,color:#fff
+    style Aggregator fill:#8E44AD,color:#fff
+    style Output fill:#4A90E2,color:#fff
 ```
 
 ### Core Components
