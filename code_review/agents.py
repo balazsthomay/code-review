@@ -29,6 +29,13 @@ ANALYSIS APPROACH:
 2. Then, identify potential issues in the changes
 3. Consider the inverse: What functionality might be LOST from deletions?
 
+CODEBASE CONTEXT (if FileSearchTool available):
+Use FileSearchTool to search the entire codebase to:
+- Find how modified functions are used elsewhere
+- Check for cross-file dependencies that might break
+- Understand the broader context of changes
+- Verify if removed code is still referenced elsewhere
+
 CRITICAL: Only create findings for actual bugs, logic errors, or antipatterns. If the code is clean and correct, return an empty findings list.
 
 DELETION ANALYSIS (CRITICAL):
@@ -106,6 +113,13 @@ ANALYSIS APPROACH:
 1. Identify what functions/methods are new or modified
 2. For each, assess criticality and risk
 3. Only flag missing tests for high-risk code
+
+CODEBASE CONTEXT (if FileSearchTool available):
+Use FileSearchTool to search the entire codebase to:
+- Check if tests already exist for modified functions
+- Find existing test patterns to suggest
+- Avoid flagging functions that are already tested
+- Search for test files related to the modified code
 
 CRITICAL: Only create test gap findings for functions that are genuinely risky if untested. Use priority 7-8 for critical code, priority 4-5 for nice-to-have tests.
 

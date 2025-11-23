@@ -7,11 +7,15 @@ An AI-powered code review system using specialized agents with RAG to analyze co
 ```mermaid
 flowchart TD
     Input[Git Diff] --> RAG[Vector DB<br/>5 Collections]
+    Input --> Codebase[Codebase<br/>Vector Store]
 
     RAG --> Agent1[Code Analyzer]
     RAG --> Agent2[Security Agent]
     RAG --> Agent3[Best Practices Agent]
     RAG --> Agent4[Test Coverage Agent]
+
+    Codebase --> Agent1
+    Codebase --> Agent4
 
     Input --> Agent1
     Input --> Agent2
@@ -27,6 +31,7 @@ flowchart TD
 
     style Input fill:#4A90E2,color:#fff
     style RAG fill:#F39C12,color:#fff
+    style Codebase fill:#E74C3C,color:#fff
     style Agent1 fill:#27AE60,color:#fff
     style Agent2 fill:#27AE60,color:#fff
     style Agent3 fill:#27AE60,color:#fff
@@ -35,14 +40,29 @@ flowchart TD
     style Output fill:#4A90E2,color:#fff
 ```
 
+### Flow
+
+1. **Input**: Code diff enters the system and codebase is indexed into vector store
+2. **RAG Enhancement**: Vector search retrieves relevant patterns from 5 knowledge bases
+3. **Codebase Context**: Code Analyzer and Test Coverage agents use FileSearchTool to search the codebase
+4. **Parallel Analysis**: 4 specialized agents analyze the diff with RAG context and codebase context
+5. **Aggregation**: Findings are deduplicated and merged by file/line
+6. **Output**: Consolidated markdown report with severity-ranked issues
+
 ### Core Components
 
 **Multi-Agent System**
-- Code Analyzer: Detects bugs, logic errors, and antipatterns
+- Code Analyzer: Detects bugs, logic errors, and antipatterns (with codebase context)
 - Security Agent: Identifies security vulnerabilities
 - Best Practices Agent: Checks code quality and maintainability
-- Test Coverage Agent: Identifies missing test scenarios
+- Test Coverage Agent: Identifies missing test scenarios (with codebase context)
 - Aggregator: Deduplicates and merges findings
+
+**Codebase Context (FileSearchTool)**
+- Fresh-per-PR vector store created from entire codebase
+- Code Analyzer uses it to check cross-file dependencies
+- Test Coverage Agent uses it to find existing tests
+- Auto-expires after 1 day (zero idle costs)
 
 **RAG Knowledge Base**
 - 5 vector collections with 82 patterns
@@ -102,6 +122,7 @@ code_review/
 ├── schemas.py              # Pydantic models
 ├── agents.py               # 4 review agents + aggregator
 ├── pipeline.py             # Main orchestration
+├── vector_store.py         # Codebase vector store utilities
 ├── rag/
 │   ├── retrieval.py        # Vector search functions
 │   └── build_*.py          # Knowledge base builders (5)

@@ -5,9 +5,11 @@ Usage:
     uv run run_review.py path/to/diff.diff  # Use custom diff file
 """
 
+import os
 import sys
 import asyncio
 from code_review import review_code
+from code_review.vector_store import create_vector_store_from_codebase, delete_vector_store
 
 # Sample diff for demonstration
 SAMPLE_DIFF = """diff --git a/app/database.py b/app/database.py
@@ -67,7 +69,22 @@ async def main():
     else:
         diff = easy_diff
 
-    report = await review_code(serious_diff, save_output=False, min_severity=5)
+    # Create vector store for codebase context
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if not openai_api_key:
+        print("Warning: OPENAI_API_KEY not found. Running without codebase context.")
+        vector_store_id = None
+    else:
+        print("Creating vector store from codebase...")
+        vector_store_id = create_vector_store_from_codebase(api_key=openai_api_key, root_dir=".", name="PR Review Context - Local Test", expires_days=1)
+
+    try:
+        report = await review_code(serious_diff, save_output=False, min_severity=5, vector_store_id=vector_store_id)
+    finally:
+        # Clean up vector store
+        if vector_store_id and openai_api_key:
+            print("Cleaning up vector store...")
+            delete_vector_store(api_key=openai_api_key, vector_store_id=vector_store_id)
 
 
 if __name__ == "__main__":
