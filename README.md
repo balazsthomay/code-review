@@ -1,46 +1,69 @@
-# Multi-Agent Code Review
+# Multi-Agent Code Review System
 
-An AI-powered code review system using multiple specialized agents with RAG (Retrieval-Augmented Generation) to analyze code changes for bugs, security vulnerabilities, best practices violations, and test coverage gaps.
+An AI-powered code review system using specialized agents with RAG to analyze code changes.
 
 ## Architecture
 
+```mermaid
+flowchart TD
+    Input[Git Diff] --> RAG[Vector DB<br/>5 Collections]
+
+    RAG --> Agent1[Code Analyzer]
+    RAG --> Agent2[Security Agent]
+    RAG --> Agent3[Best Practices Agent]
+    RAG --> Agent4[Test Coverage Agent]
+
+    Input --> Agent1
+    Input --> Agent2
+    Input --> Agent3
+    Input --> Agent4
+
+    Agent1 --> Aggregator[Aggregator]
+    Agent2 --> Aggregator
+    Agent3 --> Aggregator
+    Agent4 --> Aggregator
+
+    Aggregator --> Output[PR Review Comment]
+
+    style Input fill:#e1f5ff
+    style RAG fill:#fff4e1
+    style Agent1 fill:#e8f5e9
+    style Agent2 fill:#e8f5e9
+    style Agent3 fill:#e8f5e9
+    style Agent4 fill:#e8f5e9
+    style Aggregator fill:#f3e5f5
+    style Output fill:#e1f5ff
+```
+
 ### Core Components
 
-**1. Multi-Agent System**
-- **Code Analyzer Agent**: Detects bugs, logic errors, resource leaks, and antipatterns
-- **Security Agent**: Identifies security vulnerabilities (SQL injection, command injection, path traversal, insecure deserialization, hardcoded secrets)
-- **Best Practices Agent**: Checks code quality, style violations, and maintainability issues
-- **Test Coverage Agent**: Identifies missing test scenarios and coverage gaps
+**Multi-Agent System**
+- Code Analyzer: Detects bugs, logic errors, and antipatterns
+- Security Agent: Identifies security vulnerabilities
+- Best Practices Agent: Checks code quality and maintainability
+- Test Coverage Agent: Identifies missing test scenarios
+- Aggregator: Deduplicates and merges findings
 
-**2. RAG Knowledge Base (ChromaDB)**
-- **5 vector collections with 82 patterns total:**
-  - Security patterns (43): Complete OWASP Top 10 2021 with CWE mappings
-  - Best practices patterns (20): PEP 8, PEP 257 guidelines
-  - Python gotchas patterns (9): Late binding, mutable defaults, etc.
-  - Code review patterns (8): Google Engineering Practices, API breaking changes
-  - Refactoring patterns (7): Shotgun surgery, cross-file dependencies, backward compatibility (Google AIP-180, Martin Fowler, Kent Beck TDD)
-- Vector similarity search retrieves relevant patterns based on code diff
-- All patterns sourced from authoritative references (OWASP, Google, Python.org, Refactoring Guru)
+**RAG Knowledge Base**
+- 5 vector collections with 82 patterns
+- Security (43): OWASP Top 10 2021 with CWE mappings
+- Best practices (20): PEP 8, PEP 257 guidelines
+- Python gotchas (9): Common pitfalls
+- Code review (8): Google Engineering Practices
+- Refactoring (7): Cross-file patterns
 
-**3. Aggregator**
-- Deduplicates findings across agents
-- Merges related issues by file and line numbers
-- Generates consolidated markdown reports
-
-**4. Evaluation Framework**
-- **Hybrid evaluation** combining automated location metrics + LLM semantic relevance
-- **Metrics**: File recall, line precision/recall (with 5-line tolerance), LLM relevance (0.0-1.0), composite score
-- **Benchmark**: BugsInPy dataset (502 real Python bugs from 17 production projects)
-- **Tested on 20+ diverse bugs** across scrapy, ansible, keras, pandas, matplotlib, fastapi, etc.
-
-- + 5 test cases covering SQL injection, logic bugs, code quality, and multi-file security issues
+**Evaluation Framework**
+- Hybrid evaluation: location metrics + LLM semantic relevance
+- Metrics: file recall, line precision/recall, LLM relevance, composite score
+- Benchmarks: BugsInPy (502 bugs), CVE (17 vulnerabilities), synthetic (5 test cases)
 
 ## Setup
+
 ```bash
 # Install dependencies
 uv sync
 
-# Build all knowledge bases
+# Build knowledge bases
 uv run -m code_review.rag.build_security_kb
 uv run -m code_review.rag.build_best_practices_kb
 uv run -m code_review.rag.build_python_gotchas_kb
@@ -51,67 +74,49 @@ uv run -m code_review.rag.build_refactoring_patterns_kb
 ## Usage
 
 ```bash
+# Run on sample diff
 uv run run_review.py
+
+# Run on custom diff file
+uv run run_review.py path/to/diff.diff
+
+# Run benchmarks
+uv run -m code_review.benchmarks.synthetic
+uv run -m code_review.benchmarks.bugsinpy
+uv run -m code_review.benchmarks.cve
 ```
 
-## Workflow
+## Performance
 
-1. Input: Git diff of code changes
-2. Each agent analyzes the diff independently with RAG-enhanced context
-3. RAG retrieves relevant patterns from 5 knowledge bases (security, best practices, gotchas, code review, refactoring)
-4. Aggregator deduplicates and merges findings into consolidated report
-5. Evaluation framework measures performance against ground truth
+**BugsInPy:** 100% pass rate (18/18 bugs)
+
+**CVE:** 94% pass rate (16/17 vulnerabilities), 94% security detection
+
+**Synthetic:** 5 hand-crafted test cases covering SQL injection, logic bugs, code quality, multi-file security
 
 ## Project Structure
+
 ```
-.
-├── code_review/                      # Main package
-│   ├── __init__.py                  # Exports review_code
-│   ├── schemas.py                   # Pydantic models (8 schemas)
-│   ├── agents.py                    # 5 agents (4 review + aggregator)
-│   ├── pipeline.py                  # Main review pipeline
-│   ├── rag/                         # RAG knowledge base
-│   │   ├── retrieval.py            # 5 retrieval functions
-│   │   ├── build_security_kb.py    # OWASP Top 10 2021 (43 patterns)
-│   │   ├── build_best_practices_kb.py  # PEP 8/257 (20 patterns)
-│   │   ├── build_python_gotchas_kb.py  # Python pitfalls (9 patterns)
-│   │   ├── build_code_review_kb.py     # Google practices (8 patterns)
-│   │   └── build_refactoring_patterns_kb.py  # Refactoring (7 patterns)
-│   └── benchmarks/                  # Evaluation framework
-│       ├── utils.py                # Shared evaluation utilities
-│       ├── synthetic.py            # 5 synthetic test cases
-│       ├── bugsinpy.py             # BugsInPy dataset (502 bugs)
-│       └── cve.py                  # CVE dataset (17 CVEs)
-├── .github/
-│   ├── workflows/
-│   │   └── code-review.yml         # GitHub Action workflow
-│   └── actions/
-│       └── review-pr/              # Reusable action
-│           ├── action.yml          # Action definition
-│           └── review_pr.py        # PR review orchestration
-├── chroma_db/                        # Vector database (committed)
-├── test-cases/                       # Synthetic test cases
-├── BugsInPy/                         # BugsInPy dataset (not in repo)
-├── cve_patches/                      # CVE patch files (not in repo)
-└── pyproject.toml                    # Dependencies
+code_review/
+├── __init__.py
+├── schemas.py              # Pydantic models
+├── agents.py               # 4 review agents + aggregator
+├── pipeline.py             # Main orchestration
+├── rag/
+│   ├── retrieval.py        # Vector search functions
+│   └── build_*.py          # Knowledge base builders (5)
+└── benchmarks/
+    ├── utils.py            # Evaluation utilities
+    ├── synthetic.py        # Synthetic test cases
+    ├── bugsinpy.py         # BugsInPy benchmark
+    └── cve.py              # CVE benchmark
+
+.github/
+├── workflows/
+│   └── code-review.yml     # GitHub Action workflow
+└── actions/
+    └── review-pr/          # Reusable action
 ```
-
-## Current Performance
-
-**BugsInPy Benchmark:** 100% pass rate (18/18 valid bugs passed with composite score ≥ 60%)
-
-**CVE Benchmark:** 94% pass rate (16/17 CVEs, 94% security detection rate)
-- 17 real-world Python CVEs covering 11 CWE types (SQL Injection, Command Injection, XSS, Path Traversal, etc.)
-- Projects: Django, Requests, urllib3, Setuptools, Jinja2, PyYAML, Pillow, Flask, Cryptography
-
-**Key improvements:**
-- Prompt engineering: Deletion analysis + chain-of-thought reasoning (70% → 100%)
-- Multi-file awareness in aggregator for cross-file dependency detection
-- Temperature optimization: default for review agents, 0.5 for aggregator/judge
-- Schema validation: max 20 lines per finding + max_tokens=4000
-
-Note: the notebooks were built and tested in the root and subsequently moved to the notebooks/ folder after converting to python modules so the imports might not work there.
-
 
 ## GitHub Action Integration
 
@@ -135,11 +140,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Run AI Code Review
         uses: balazsthomay/code-review@main
         with:
