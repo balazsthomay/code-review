@@ -1,6 +1,6 @@
 # Multi-Agent Code Review System
 
-An AI-powered code review system using specialized agents with RAG to analyze code changes.
+Multi-agent code review system that finds bugs, security vulnerabilities, and test gaps in pull requests.
 
 ## Architecture
 
